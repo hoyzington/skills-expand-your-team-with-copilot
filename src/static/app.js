@@ -554,6 +554,13 @@ document.addEventListener("DOMContentLoaded", () => {
             .join("")}
         </ul>
       </div>
+      <div class="share-buttons">
+        <span class="share-label">Share:</span>
+        <button class="share-button" data-share="facebook" title="Share on Facebook" aria-label="Share on Facebook">Facebook</button>
+        <button class="share-button" data-share="twitter" title="Share on X" aria-label="Share on X">X</button>
+        <button class="share-button" data-share="email" title="Share by email" aria-label="Share by email">Email</button>
+        <button class="share-button" data-share="copy" title="Copy link" aria-label="Copy link">Copy</button>
+      </div>
       <div class="activity-card-actions">
         ${
           currentUser
@@ -573,6 +580,12 @@ document.addEventListener("DOMContentLoaded", () => {
       </div>
     `;
 
+    activityCard.querySelectorAll(".share-button").forEach((button) => {
+      button.addEventListener("click", () =>
+        shareActivity(button.dataset.share, name, details.description, button)
+      );
+    });
+
     // Add click handlers for delete buttons
     const deleteButtons = activityCard.querySelectorAll(".delete-participant");
     deleteButtons.forEach((button) => {
@@ -590,6 +603,33 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     activitiesList.appendChild(activityCard);
+  }
+
+  // Share an activity with friends
+  function shareActivity(kind, name, description, button) {
+    const url = window.location.href.split("#")[0];
+    const text = `Check out ${name} at Mergington High School: ${description}`;
+    if (kind === "facebook") {
+      window.open(
+        `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}&quote=${encodeURIComponent(text)}`,
+        "_blank",
+        "noopener,noreferrer"
+      );
+    } else if (kind === "twitter") {
+      window.open(
+        `https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(url)}`,
+        "_blank",
+        "noopener,noreferrer"
+      );
+    } else if (kind === "email") {
+      window.location.href = `mailto:?subject=${encodeURIComponent(name)}&body=${encodeURIComponent(text + "\n" + url)}`;
+    } else if (kind === "copy" && navigator.clipboard) {
+      navigator.clipboard.writeText(`${text} ${url}`).then(() => {
+        const old = button.textContent;
+        button.textContent = "Copied!";
+        setTimeout(() => (button.textContent = old), 1500);
+      });
+    }
   }
 
   // Event listeners for search and filter
